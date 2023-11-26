@@ -1,0 +1,63 @@
+# Mod8
+import threading
+import random
+import time
+
+class ThreeThreads:
+    def __init__(self):
+        self.output = {"letters": "", "numbers": "", "symbols": ""}
+        self.locks = [threading.Lock() for _ in range(3)]
+
+    def generate_letters(self):
+        for _ in range(10000):
+            self.locks[0].acquire()
+            self.output["letters"] += chr(random.randint(97, 122))  # Random lowercase letter
+            self.locks[0].release()
+            time.sleep(0.001)
+
+    def generate_numbers(self):
+        for _ in range(10000):
+            self.locks[1].acquire()
+            self.output["numbers"] += str(random.randint(0, 9))  # Random digit
+            self.locks[1].release()
+            time.sleep(0.001)
+
+    def generate_symbols(self):
+        for _ in range(10000):
+            self.locks[2].acquire()
+            self.output["symbols"] += random.choice('!@#$%&*')  # Random symbol
+            self.locks[2].release()
+            time.sleep(0.001)
+
+    def display_output(self):
+        while len(self.output["letters"]) < 10000 or len(self.output["numbers"]) < 10000 or len(self.output["symbols"]) < 10000:
+            with self.locks[0]:
+                print(self.output["letters"][:100])
+                self.output["letters"] = self.output["letters"][100:]
+            with self.locks[1]:
+                print(self.output["numbers"][:100])
+                self.output["numbers"] = self.output["numbers"][100:]
+            with self.locks[2]:
+                print(self.output["symbols"][:100])
+                self.output["symbols"] = self.output["symbols"][100:]
+            time.sleep(0.1)
+
+    def start_threads(self):
+        t1 = threading.Thread(target=self.generate_letters)
+        t2 = threading.Thread(target=self.generate_numbers)
+        t3 = threading.Thread(target=self.generate_symbols)
+        t4 = threading.Thread(target=self.display_output)
+
+        t1.start()
+        t2.start()
+        t3.start()
+        t4.start()
+
+        t1.join()
+        t2.join()
+        t3.join()
+        t4.join()
+
+if __name__ == "__main__":
+    obj = ThreeThreads()
+    obj.start_threads()
